@@ -994,6 +994,16 @@ func nodeType2(interp *Interpreter, sc *scope, n *node, seen []*node) (t *itype,
 			// Continue search in source package, as it may exist if package contains generics.
 			fallthrough
 		case srcPkgT:
+			pkg := interp.binPkg[lt.path]
+			if v, ok := pkg[name]; ok {
+				rtype := v.Type()
+				if isBinType(v) {
+					// A bin type is encoded as a pointer on a typed nil value.
+					rtype = rtype.Elem()
+				}
+				t = valueTOf(rtype, withNode(n), withScope(sc))
+				break
+			}
 			if pkg, ok := interp.srcPkg[lt.path]; ok {
 				if s, ok := pkg[name]; ok {
 					t = s.typ
